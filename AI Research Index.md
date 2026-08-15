@@ -4,8 +4,13 @@ Root index for the AI Research vault. Link new notes here.
 
 ## Topics
 
+- [[Ability Execution Index]]
 - [[Effect System Index]]
+- [[Event VM Index]]
+- [[Scenario Index]]
+- [[SFX Index]]
 - [[Unit Deployment Index]]
+- [[Unit Sprite Index]]
 
 ## Setup
 

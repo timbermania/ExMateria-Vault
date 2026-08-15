@@ -18,14 +18,22 @@ Executable MIPS code embedded at the start of CODE-format E###.BIN effect files 
   - src: `research/key_documents/MIPS_EMBEDDED_CODE.md`
 - **Effect code computes vertex positions with ROM helpers: lerp (0x801A8BE0, result = start + ((end − start) × t) >> 8 with t = 0–255 normalized time) for keyframe interpolation, and rsin (0x8001BB5C) / rcos (0x8001BC28) lookup tables (4096 entries = full circle) scaled by radius for circular/arc motion.** — `[S] 1/3`
   - S: lerp 0x801A8BE0, rsin 0x8001BB5C, rcos 0x8001BC28, per `research/key_documents/MIPS_EMBEDDED_CODE.md`
+  - S: lerp 0x801A8BE0, rsin 0x8001BB5C, per `research/key_documents/working_documents/MIPS_EDITOR_EXPLORATION.md`
   - src: `research/key_documents/MIPS_EMBEDDED_CODE.md`
 - **Computed vertices are projected by the GTE COP2 — RTPT (0x480DF800) applies rotation matrix + translation + perspective projection to three vertices (V0–V2) with screen coordinates stored via swc2 $12–$14 — after which the code builds GPU primitives at runtime (e.g. 24-byte POLY_F4 flat-shaded quads, primitive tag type 0x28) and submits them to the ordering table via AddPrim (0x80023BB4).** — `[S] 1/3`
   - S: AddPrim 0x80023BB4, RTPT/MVMVA/CTC2/MTC2/SWC2 usage, per `research/key_documents/MIPS_EMBEDDED_CODE.md`
+  - S: AddPrim 0x80023BB4, per `research/key_documents/working_documents/MIPS_EDITOR_EXPLORATION.md`
   - src: `research/key_documents/MIPS_EMBEDDED_CODE.md`
 - **E067.BIN (Ifrit) layout: MIPS code at 0x0000–0x1C68 (7,272 bytes), data tables (animation curves) from 0x1C70 (~3 KB), then standard effect data (emitters, textures, ~85 KB).** — `[ ] 0/3`
   - src: `research/key_documents/MIPS_EMBEDDED_CODE.md`
 - **E067's (Ifrit) callback runs a state machine tracking animation phase and computes fire-swirl paths with sin/cos: per invocation it calls lerp 12 times, rsin and rcos 3 times each, 9 RTPT instructions (27 vertices), and AddPrim once per main-loop iteration.** — `[ ] 0/3`
   - src: `research/key_documents/MIPS_EMBEDDED_CODE.md`
+- **The MIPS inside CODE-format effects is hand-written assembly with timing-sensitive sections — branch delay slots and register allocation matter — so a decompile-to-C-and-recompile round trip cannot reproduce byte-identical code.** — `[ ] 0/3`
+  - src: `research/key_documents/working_documents/MIPS_EDITOR_EXPLORATION.md`
+- **rsin/rcos calling convention: the angle is passed in $a0 as 0–4095 (0–360°) and the result is returned in $v0 as fixed-point scaled ×4096 (e.g. $v0 = cos(angle) × 4096).** — `[ ] 0/3`
+  - src: `research/key_documents/working_documents/MIPS_EDITOR_EXPLORATION.md`
+- **The MIPS code in E067.BIN (Ifrit) carries editable parameters at fixed code offsets: 0x0640 `li a1, 0x0100` radius scale (256), 0x0710 `li a0, 0x002D` frame count (45), 0x0820 `li t0, 0xFF80` colour R (255).** — `[ ] 0/3`
+  - src: `research/key_documents/working_documents/MIPS_EDITOR_EXPLORATION.md`
 
 ## Notes
 

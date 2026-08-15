@@ -37,9 +37,27 @@ Binary format of `BATTLE/ENTD{1..4}.ENT`, the unit-deployment tables walked at s
 - **The sanity anchor entd_idx 256 → ENTD3 record 0 → slot 0 is Princess Ovelia: sprite_set 0x0C, unit_id 0x0C, job 0x5E (Princess), PSX position (8, 4) which is palindromic under the chirality fix (size_z 9), facing 3 (East), flags2.always_present set; the record has 10 used slots then 6 with unit_id 0xFF.** — `[R] 1/3`
   - R: `godot-learning/tools/test_parse_entd.py` (test_scenario_1_ovelia_slot_0, test_entd_256_is_ovelia)
   - src: `research/key_documents/ENTD_FORMAT.md`
+- **Scenario 6's resident cinematic cast (event unit ids 131–138) is placed at scenario load from ENTD 387 — loaders `FUN_8017f388` / `entd_to_roster_loader_16` (`0x8017F8A0`) populate the records and `FUN_8017f640` writes their tiles from the ENTD X/Y bytes, presence gated by ENTD flag `+0x05 & 0xC0` (cinematic) with the marker riding `+0x161` — and it never moves across the cutscene, so it is a static backdrop, not script-spawned by event ops.** — `[S·D] 2/3`
+  - S: `FUN_8017f388`, `FUN_8017f8a0`, `FUN_8017f640` (`battle_disassembly.txt`, static RE per the doc's §4.5b)
+  - D: scenario 6 roster polling over 20+ taps — slots 3–10 (active 0x80/0x81, ids 131–138) unchanged (2026-07-05)
+  - src: `research/working_documents/ADD_GHOST_UNIT_OPCODE_47.md`
+- **`{45}` Add Unit event handler `FUN_8008cf78` (call site `0x8008d024`, dispatched from `LAB_80145734`) calls the unit-add queue `FUN_8008e540`, whose drain runs `FUN_80088e04 → FUN_80087a28 → FUN_80083cd4(unit_id)` and sets `unit[+0x0E]` — so chunk-side Add Units increment the same allocation counter as ENTD-side adds (chapel's five late-adds land at counter values 3..7, live-verified).** — `[S·D] 2/3`
+  - S: `FUN_8008cf78` @ `0x8008d024`, `LAB_80145734`, `FUN_8008e540`, `FUN_80088e04`, `FUN_80087a28`, `FUN_80083cd4` (`battle_disassembly.txt`)
+  - D: chapel boot allocation BP at `0x80087BB0` (8 hits s3=0..7; late-adds s3=3..7) (2026-06-28)
+  - src: `research/working_documents/chapel_opcode_trace/HANDOFF_sprite_palette_resolution.md`
+- **ENTD record 256 (ENTD3 record 0, the chapel record) generic-soldier slots 5–9 (uid 0x83/0x84/0x80/0x81/0x82, sprite_set 0x80/0x81 markers, jobs 0x4A/0x4C/0x4B/0x4C/0x4D) carry palette bytes 0/0/2/2/2, and the palette byte persists through sprite resolution — the Red soldiers (palette=2) render from their resolved SPR palettes (KNIGHT_M/YUMI_M/ITEM_M) at row 2.** — `[D] 1/3`
+  - D: session-4 bit-match table, chapel full cast (scenario_id=4, 2026-06-28; `_clut_live.json` in the doc dir)
+  - src: `research/working_documents/chapel_opcode_trace/HANDOFF_sprite_palette_resolution.md`
+- **In the chapel (scenario 1) cinematic, the PSX roster-slot ↔ chunk unit-id mapping is slot 0↔0x13, 1↔0x34, 2↔0x02, 4↔0x83, 12↔0x0C — inferred from the chunk's cinematic Unit Anim writes.** — `[D] 1/3`
+  - D: chapel opcode trace captures `pcsx_run.jsonl` (194 state-change rows) + `godot_run.jsonl` (2161 rows), PC↔vsync anchored on cinematic Unit Anim writes at 188 distinct vsync points (2026-06-27)
+  - src: `research/working_documents/chapel_opcode_trace/report.md`
 
 ## Notes
 
 (empty — user territory)
 
 ## Related
+
+- [[Add Ghost Unit Opcode]]
+- [[Cinematic Palette Pipeline]]
+- [[Rotate Unit Interpolation]]

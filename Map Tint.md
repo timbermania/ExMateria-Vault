@@ -7,6 +7,7 @@ The "Affected Units" palette track (Track 0) tints map/terrain geometry as well 
 - **Track 0 (Affected Units) tints both units and map/terrain from the same keyframe data; the map/terrain RGB is scaled ×8 (R<<3, G<<3, B<<3) relative to the unit values.** — `[S] 1/3`
   - S: `advance_affected_units_palette_track` at 0x801A45C8, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
   - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+  - ⚠ SUPERSEDED (2026-08-14) by: the affected-units palette track advances through advance_affected_units_palette_track at 0x801A41A0; 0x801A45C8 is advance_screen_color_track
 - **The scaled map tint RGB is written to register DAT_800f5b58 via FUN_80090dec() → FUN_800e8190(99, &rgb) and applied to terrain polygon vertex colors during map rendering in FUN_8012d2b4.** — `[S] 1/3`
   - S: symbols FUN_80090dec, FUN_800e8190, FUN_8012d2b4 and register DAT_800f5b58, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
   - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`

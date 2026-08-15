@@ -1,6 +1,6 @@
 # Color Track Interpolation
 
-FFT color-track keyframe transitions are not parameterized in the effect data: the ROM contains a hardcoded 64-entry dither-curve table at 0x800956e4 (BATTLE.BIN), and the engine selects a curve from the magnitude of the color delta at keyframe time, then adds one sign-extended curve byte per frame for 32 frames. This gives smooth linear fades — or rapid pulses under mode 9 — with no division and no per-effect curve storage.
+FFT color-track keyframe transitions are not parameterized in the effect data: the ROM contains a hardcoded 64-entry dither-curve table at 0x800956e4 (BATTLE.BIN), and the engine selects a curve from the magnitude of the color delta at keyframe time, then adds one sign-extended curve byte per frame for 32 frames. This gives smooth linear fades — or rapid pulses under mode 9 — with no division and no per-effect curve storage. The tracks modify unit palettes (caster/target/affected sprites), not the effect's own textures, which use the separate static BGR555 texture palette.
 
 ## Points
 
@@ -19,6 +19,9 @@ FFT color-track keyframe transitions are not parameterized in the effect data: t
 - **Mode 9 pulsing is not a special code path; the palette state is simply set to use curve indices with rapid 0xFF/0x00 patterns, producing the strobe-like effect.** — `[S] 1/3`
   - S: curve table patterns at 0x800956e4, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
   - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+- **The effect's texture palette (texture_ptr section; static 256-entry BGR555 CLUT) colors the effect's own sprites, while the timeline color tracks (RGB delta + mode, keyframed) modify unit palettes (caster/target/affected units) — the two are separate mechanisms with different scope and format.** — `[S] 1/3`
+  - S: palette vs color-track distinction table, per `research/key_documents/TEXTURE_AND_PALETTE_FORMAT.md`
+  - src: `research/key_documents/TEXTURE_AND_PALETTE_FORMAT.md`
 
 ## Notes
 
@@ -27,3 +30,4 @@ FFT color-track keyframe transitions are not parameterized in the effect data: t
 ## Related
 
 - [[Map Tint]]
+- [[Effect Texture Upload]]

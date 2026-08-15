@@ -1,6 +1,6 @@
 # Effect Execution Model
 
-FFT's runtime execution architecture for E###.BIN visual effects: a per-frame main loop drives a 16-bit opcode script interpreter whose words pack a 9-bit opcode (bits 0–8) and a 7-bit flags field (bits 9–15) and which dispatches through a 512-entry jump table, with two dominant execution patterns — a two-phase timeline-driven animation (opcode 41, op_process_timeline_frame) and a simple single-phase tick (opcode 40, op_animate_tick) — all state held in 248-byte EffectState instances in a fixed array. Emitters are fired by timeline-channel keyframes in Pattern 1 (not by script opcodes directly), feeding the shared particle pipeline (emitter_control_routine / update_all_particles).
+FFT's runtime execution architecture for E###.BIN visual effects: a per-frame main loop drives a 16-bit opcode script interpreter whose words pack a 9-bit opcode (bits 0–8) and a 7-bit flags field (bits 9–15) and which dispatches through a 512-entry jump table, with two dominant execution patterns — a two-phase timeline-driven animation (opcode 41, op_process_timeline_frame) and a simple single-phase tick (opcode 40, op_animate_tick) — all state held in 248-byte EffectState instances in a fixed array. The main loop (effect_system_main_loop 0x801A18D8) is itself a 7-state state machine whose state 2 performs the one-time texture/CLUT VRAM upload (FUN_801a0e80) before state 3 initializes globals and state 4 runs the per-frame execution. Emitters are fired by timeline-channel keyframes in Pattern 1 (not by script opcodes directly), feeding the shared particle pipeline (emitter_control_routine / update_all_particles).
 
 ## Points
 
@@ -45,7 +45,7 @@ FFT's runtime execution architecture for E###.BIN visual effects: a per-frame ma
 - **Opcode 37 (update_all_particles, 0x801A2EB4) advances all particles each frame: it calls integrate_particle_motion (0x801A9BB0) for physics, processes lifetime countdown / animation-driven death, and spawns child emitters on death or mid-life.** — `[S] 1/3`
   - S: update_all_particles 0x801A2EB4, integrate_particle_motion 0x801A9BB0, per `research/key_documents/EFFECT_EXECUTION_MODEL.md`
   - src: `research/key_documents/EFFECT_EXECUTION_MODEL.md`
-- **The effect subsystem's global pointers are 0x801BBF78 (sprite_def_table_ptr), 0x801BBF7C (effect_anim_tbl_ptr), 0x801BBF84 (timeline_channel_base), 0x801BBF88 (effect_data_ptr), 0x801BBF8C (animation_table_ptr), 0x801BC0C8 (timeline_section_ptr), 0x801BACC8 (effect_flags_ptr), and 0x801B9258 (time_scale_ptr).** — `[S] 1/3`
+- **The effect subsystem's global pointers are 0x801BBF78 (sprite_def_table_ptr), 0x801BBF7C (effect_anim_tbl_ptr), 0x801BBF84 (timeline_channel_base), 0x801BBF88 (effect_data_ptr), 0x801BBF8C (animation_table_ptr), 0x801BC0C8 (timeline_section_ptr), 0x801BACC8 (effect_flags_ptr), and 0x801B9258 (time_scale_ptr).** — `[S] 1/3 CONTESTED`
   - S: global pointer addresses 0x801BBF78–0x801B9258, per `research/key_documents/EFFECT_EXECUTION_MODEL.md`
   - S: 0x801BC0C8 (timeline_section_ptr), per `research/key_documents/LUA_DEBUGGING.md`
   - S: same pointer set with header-field provenance, per `research/key_documents/EFFECT_FILE_FORMAT.md`
@@ -62,6 +62,34 @@ FFT's runtime execution architecture for E###.BIN visual effects: a per-frame ma
 - **Effect-script instruction sizes are fixed per opcode — 2 bytes (no args): opcodes 3,4,5,9,10,12,13,15,32,33,36,37,38,39,40,42,43,44,45; 4 bytes (1 arg): opcodes 0,1,2,6,7,16,26,27,29,30,31,34,35,41; 6 bytes (2 args): opcodes 17,18,19,20,21,22,23,24,25,28; 8 bytes (3 args): opcodes 8,11,14 — each instruction being a 16-bit word followed by (size−2)/2 16-bit args.** — `[S] 1/3 CONTESTED`
   - S: per-opcode instruction size table, per `research/key_documents/SCRIPT_EDITOR_LESSONS.md`
   - src: `research/key_documents/SCRIPT_EDITOR_LESSONS.md`
+- **EffectState's timeline header (0x22–0x29, common to Patterns 1 and 2) holds callback_state[4] at 0x22 (set to 3 when the callback is 2 frames from ending), effect_target_index at 0x26, and the timeline frame counter — timeline_frame_counter in Pattern 1, anim_progress in Pattern 2 — at 0x28.** — `[S] 1/3`
+  - S: EffectState timeline header offsets 0x22–0x29, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **EffectState's timeline footer (0xD0–0xF7, common to all variants) holds particle_list_head at 0xD0, the four timeline callback function pointers (callback_ptrs[4]) at 0xD4, sprite_ptrs[4] at 0xE4, and current_callback_ptr at 0xF4.** — `[S] 1/3`
+  - S: EffectState timeline footer offsets 0xD0–0xF7, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **EffectState_P2 (Pattern 2, opcode 40) keeps its channel state at 0x2A–0x5E: particle_keyframe[5] 0x2A, sound_keyframe[3] 0x34, color_keyframe[4] 0x3A, particle_duration[5] 0x44, sound_duration[3] 0x4E, color_duration[4] 0x54, and particle_spawn_counter[5] 0x5E.** — `[S] 1/3`
+  - S: EffectState_P2 layout offsets 0x2A–0x5E, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **EffectState_P1 (Pattern 1, opcode 41) keeps its channel state at 0x2A–0xA0: child_spawn_delay 0x2A, spawned_target_count 0x2C (fire-and-forget children are not limited to 4), phase1/phase2 particle keyframes at 0x2E/0x38, color track keyframes (palette, caster, target, screen, tracks 4–7) at 0x42–0x60, phase1/phase2 particle durations at 0x62/0x6C, color track durations at 0x76–0x92, and phase1/phase2 particle spawn counters at 0x96/0xA0.** — `[S] 1/3`
+  - S: EffectState_P1 layout offsets 0x2A–0xA0, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **EffectState_P1's six int16 sound fields (phase1/phase2 sound4, sound5, sound6) at 0xBB–0xC5 are read and passed to the particle-spawn routine but ignored there — dead code.** — `[S] 1/3`
+  - S: 0xBB–0xC5 (s0+0x95–0x9F with s0 = effect_state+0x26), per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **effect_cleanup lives at 0x801A1D9C with signature `void effect_cleanup(int16_t effect_index)`.** — `[S] 1/3`
+  - S: effect_cleanup 0x801A1D9C, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **Three more effect-system globals are mapped: active_effect_list_head 0x801BBF90 (head of the active-effect linked list), free_effect_list_head 0x801B9158 (head of the free effect pool), and effect_system_state 0x801B63E8 (current state-machine state).** — `[S] 1/3`
+  - S: global addresses 0x801BBF90/0x801B9158/0x801B63E8, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **Pattern 1's timeline channels each advance through a dedicated processor function: advance_affected_units_palette_track 0x801A41A0, advance_caster_palette_track 0x801A436C (takes an extra unit_id), advance_target_palette_track 0x801A444C, advance_screen_color_track 0x801A45C8, and advance_p1_sound_track 0x801A478C, each taking (track_data, keyframe_state, duration_state).** — `[S] 1/3`
+  - S: track-processor addresses 0x801A41A0–0x801A478C, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
+  - S: 0x801A45C8 (advance_screen_color_track, screen track processing), per `research/wiki_articles/screen_effect_gradient_system.md`
+  - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
+- **effect_system_main_loop (0x801a18d8) is a 7-state state machine (effect_system_state): 0 idle/cleanup (0x801a1bb8), 1 waiting for file load (0x801a195c), 2 texture upload (0x801a1920, calls FUN_801a0e80 at 0x801a1938), 3 initialize globals from header (0x801a1964), 4 main effect execution loop (0x801a1ab0), 5 exit/return (0x801a1c20), 6 cleanup (0x801a1bc0).** — `[S] 1/3`
+  - S: state-machine case addresses 0x801a1bb8–0x801a1bc0 and texture upload call at 0x801a1938, per `research/key_documents/TEXTURE_AND_PALETTE_FORMAT.md`
+  - src: `research/key_documents/TEXTURE_AND_PALETTE_FORMAT.md`
 
 ## Notes
 
@@ -72,3 +100,4 @@ FFT's runtime execution architecture for E###.BIN visual effects: a per-frame ma
 - [[E001.BIN Memory Mapping]]
 - [[Color Track Interpolation]]
 - [[Effect File Format]]
+- [[Effect Texture Upload]]

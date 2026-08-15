@@ -23,7 +23,7 @@ The static on-disk specification for FFT's E###.BIN battle effect files. Each fi
 - **CODE-format E###.BIN files begin with MIPS executable code followed by an embedded DATA section; the embedded header is located by signature (frames_ptr typically 0x28, pointers in ascending order) and its pointers are relative to the embedded header location.** — `[S] 1/3`
   - S: CODE detection and embedded-header rules, per `research/key_documents/EFFECT_FILE_FORMAT.md`
   - src: `research/key_documents/EFFECT_FILE_FORMAT.md`
-- **The runtime effect globals are initialised from the loaded file header: sprite_def_table_ptr (0x801BBF78) ← frames_ptr + 4, effect_anim_tbl_ptr (0x801BBF7C) ← anim_table_ptr, timeline_channel_base (0x801BBF84) ← timeline_section_ptr + 8, effect_data_ptr (0x801BBF88) ← header[0x0C], animation_table_ptr (0x801BBF8C) ← animation_ptr + 4, timeline_section_ptr (0x801BC0C8) ← header[0x1C], effect_flags_ptr (0x801BACC8) ← header[0x18], time_scale_ptr (0x801B9258) ← header[0x14].** — `[S] 1/3`
+- **The runtime effect globals are initialised from the loaded file header: sprite_def_table_ptr (0x801BBF78) ← frames_ptr + 4, effect_anim_tbl_ptr (0x801BBF7C) ← anim_table_ptr, timeline_channel_base (0x801BBF84) ← timeline_section_ptr + 8, effect_data_ptr (0x801BBF88) ← header[0x0C], animation_table_ptr (0x801BBF8C) ← animation_ptr + 4, timeline_section_ptr (0x801BC0C8) ← header[0x1C], effect_flags_ptr (0x801BACC8) ← header[0x18], time_scale_ptr (0x801B9258) ← header[0x14].** — `[S] 1/3 CONTESTED`
   - S: runtime global pointer table, per `research/key_documents/EFFECT_FILE_FORMAT.md`
   - src: `research/key_documents/EFFECT_FILE_FORMAT.md`
 
