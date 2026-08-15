@@ -1,0 +1,23 @@
+# Map Tint
+
+The "Affected Units" palette track (Track 0) tints map/terrain geometry as well as units, from the same keyframe data. Unit RGB values are applied raw to unit palettes, while the map/terrain RGB is scaled ×8 and written to the DAT_800f5b58 tint register, which the map renderer applies to terrain polygon vertex colors. Script opcodes 0x75/0x76 can disable/re-enable the map tint via bit 2 of effect_render_flags.
+
+## Points
+
+- **Track 0 (Affected Units) tints both units and map/terrain from the same keyframe data; the map/terrain RGB is scaled ×8 (R<<3, G<<3, B<<3) relative to the unit values.** — `[S] 1/3`
+  - S: `advance_affected_units_palette_track` at 0x801A45C8, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+  - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+- **The scaled map tint RGB is written to register DAT_800f5b58 via FUN_80090dec() → FUN_800e8190(99, &rgb) and applied to terrain polygon vertex colors during map rendering in FUN_8012d2b4.** — `[S] 1/3`
+  - S: symbols FUN_80090dec, FUN_800e8190, FUN_8012d2b4 and register DAT_800f5b58, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+  - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+- **Map tint applies only while (effect_render_flags & 2) == 0; script opcode 0x75 disables map tint (flag |= 2) and opcode 0x76 re-enables it (flag &= ~2).** — `[S] 1/3`
+  - S: opcodes 0x75/0x76 and effect_render_flags bit 2, per `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+  - src: `research/key_documents/COLOR_TRACK_INTERPOLATION.md`
+
+## Notes
+
+(empty — user territory)
+
+## Related
+
+- [[Color Track Interpolation]]
