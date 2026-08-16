@@ -19,3 +19,7 @@ Domain index for notes on the FFT event VM (cutscene script interpreter): the ev
 - [[Block Execution]]
 - [[Rotate Unit Interpolation]]
 - [[Reset Palette Opcode]]
+- [[Walk To Opcode]]
+- [[Color Screen Opcode]]
+- [[Color Tint Luma Modes]]
+- [[Event Unit Selector]]

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Effect File Format.md",
+                "file": "Add Ghost Unit Opcode.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Effect File Format"
+              "title": "Add Ghost Unit Opcode"
             }
           }
         ]
@@ -187,24 +187,37 @@
   },
   "active": "47a651dd657f0291",
   "lastOpenFiles": [
+    "Color Screen Opcode.md",
+    "Display Message Opcode.md",
+    "PSX GPU Primitives.md",
+    "Unit Sprite Index.md.tmp",
+    "Damage Number Popup System.md",
+    "Effect Execution Model.md",
+    "Unit Anim Opcode.md",
+    "Damage Number Popup System.md.tmp",
+    "Rotate Unit Interpolation.md",
+    "AI Research Index.md",
+    "Add Ghost Unit Opcode.md",
+    "Block Execution.md",
+    "Event Variable File.md",
+    "Ordering Table & AddPrim.md",
+    "Particle Runtime State.md",
+    "Effect Camera System.md",
     "Effect Texture Upload.md",
+    "Color Track Interpolation.md",
     "Effect File Format.md",
     "Map Tint.md",
     "Sprite Set Resolution.md",
-    "Ordering Table & AddPrim.md",
     "GTE World-to-Screen Transform.md",
     "ENTD Unit Deployment Table.md",
     "Effect File Buffer.md",
     "Embedded MIPS Effect Code.md",
-    "Effect Execution Model.md",
     "Effect System Index.md",
     "Unit Deployment Index.md",
     "Effect File Format.md.tmp",
     "Effect Execution Model.md.tmp",
     "Unit Deployment Index.md.tmp",
     "Sprite Set Resolution.md.tmp",
-    "Color Track Interpolation.md",
-    "AI Research Index.md",
     "Local Qwen Coder.md"
   ]
 }

@@ -20,6 +20,7 @@ Event instruction `{11}` Unit Anim plays an animation on one unit or on a team (
 - **During the Orbonne chapel cinematic the combat ticker `FUN_8017a290` fires 0 times while the cinematic dispatcher `FUN_80085c0c` fires ~6800× over 30 s — the chapel renderer is the EVTCHR path.** — `[S·D] 2/3`
   - S: `FUN_8017a290`, `FUN_80085c0c`
   - D: probe `reference_cinematic_seq_table_2026_06_25` (2026-06-25)
+  - D: probe `probe_layer4_render.lua` 30 s breakpoint hit table, `orbonne_prayer_mid_dialog.sstate` (2026-06-27): FUN_8017a290=0, FUN_80085c0c=6802, FUN_80084818=60
   - src: `research/wiki_articles/event_instruction_11_unit_anim.md`
 - **The `{11}` Unit Anim handler is `0x80149398` (`evt0x11_unit_anim_handler`), which reads the chunk and dispatches on the Animation ID.** — `[S] 1/3`
   - S: `0x80149398` (`evt0x11_unit_anim_handler`) (`battle_disassembly.txt`, master catalog `EventCommands.xml` row {11})
@@ -39,3 +40,5 @@ Event instruction `{11}` Unit Anim plays an animation on one unit or on a team (
 - [[ENTD Unit Deployment Table]]
 - [[Event Opcode Catalog]]
 - [[Scenario Beat Capture]]
+- [[EVTCHR Script VM]]
+- [[Cinematic Sprite Renderer]]

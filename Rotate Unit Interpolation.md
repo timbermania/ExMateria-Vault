@@ -33,9 +33,12 @@ Event instruction `{2D}` Rotate Unit animates a unit's facing over time rather t
   - src: `research/working_documents/chapel_opcode_trace/HANDOFF_rotation_interpolation.md`
 - **The unit struct holds its current facing as a signed 16-bit `current_facing` at offset +0x70 — the field stepped by the per-vsync tick consumer.** — `[ ] 0/3`
   - src: `research/working_documents/chapel_opcode_trace/HANDOFF_rotation_interpolation.md`
-- **The unit roster slot base is `0x800B7308` with stride `0x440`.** — `[ ] 0/3`
+- **The unit roster slot base is `0x800B7308` with stride `0x440`.** — `[S·D] 2/3`
+  - S: roster base `0x800B7308` stride `0x440` (`battle_disassembly.txt`)
+  - D: probe `probe_cinematic_actor.lua` (2026-06-27): 8 unique `a0` slot pointers across 4 s, stride exactly `0x440`, all aligning to `0x800B7308 + slot*0x440`
   - src: `research/working_documents/chapel_opcode_trace/HANDOFF_rotation_interpolation.md`
 - **Roster slot field +0x161 holds `ENTD.unit_id` (empty in the `orbonne_prayer_pre_scenario_load` sstate — slot↔uid inferred behaviourally in the chapel trace report).** — `[ ] 0/3`
+  - ⚠ SUPERSEDED (2026-08-15) by: `+0x161` is NOT the sprite uid — during the active chapel cinematic every occupied roster slot reports `+0x161 = 0x00`; the sprite identifier is the `+0x06..07` sprite-set ID (Agrias `0x0034`)
   - src: `research/working_documents/chapel_opcode_trace/HANDOFF_rotation_interpolation.md`
 - **Godot's facing arrow now uses a uniform 22.5°/byte rotation instead of per-segment lerping: `Unit.facing_angle_to_world_radians` (commit b91e5342) rotates the arrow the geometrically-correct amount, and the Agrias chapel cascade 0xC→0x4 (8 byte-steps, Direction=2 CCW) = 180°, matching the user's PSX observation.** — `[D·R] 2/3`
   - D: headful side-by-side (PCSX 8082 + Godot ScenarioPlayer) user observation (2026-06-27): arrow turns 180° on the 0xC→0x4 cascade
@@ -53,3 +56,4 @@ Event instruction `{2D}` Rotate Unit animates a unit's facing over time rather t
 - [[Wait Value Opcode]]
 - [[ENTD Unit Deployment Table]]
 - [[Sprite Cardinal Pose Selection]]
+- [[Cinematic Sprite Renderer]]
