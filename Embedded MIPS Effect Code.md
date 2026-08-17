@@ -44,3 +44,4 @@ Executable MIPS code embedded at the start of CODE-format E###.BIN effect files 
 - [[Effect File Format]]
 - [[Effect Execution Model]]
 - [[E001.BIN Memory Mapping]]
+- [[E317 Choco Ball Callback System]]

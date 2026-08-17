@@ -13,6 +13,9 @@ The PSX GTE (Geometry Transform Engine) world→screen transform used by FFT's e
 - **render_spell_charge_lines (0x801B1C04) shows how FFT combines effect positions: it builds a relative offset vector (0, arc_height, 0), rotates that vector through the GTE to get a screen-space offset, and only then adds the caster's screen position — i.e. FFT combines positions in screen space, not world space.** — `[S] 1/3`
   - S: render_spell_charge_lines 0x801B1C04, per `research/key_documents/CUSTOM_EFFECT_HOOKS.md`
   - src: `research/key_documents/CUSTOM_EFFECT_HOOKS.md`
+- **E317's bicone callback (CB92, FUN_801c44a0) projects each 3D vertex with the GTE's single-vertex perspective command RTPS (`copFunction 0x480012` — rotate + translate + perspective divide in one instruction) after `RotMatrix_gte`/`SetRotMatrix` (0x8001D0A8/0x8001D138) load the camera matrix at 0x80098A24, reading screen X/Y and depth back through the GTE's 3-deep output FIFO (SXY0/SXY1/SXY2) while projecting the next cross-section; the companion trail ribbon (CB91) uses the matrix-multiply path (ApplyMatrixLV 0x8001D578) instead.** — `[S] 1/3`
+  - S: copFunction 0x480012, camera matrix 0x80098A24, per `research/working_documents/E317_callback_system.md`
+  - src: `research/working_documents/E317_callback_system.md`
 
 ## Notes
 

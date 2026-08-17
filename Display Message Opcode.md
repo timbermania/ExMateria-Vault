@@ -37,6 +37,7 @@ The event instruction `{10}` Display Message is FFT's text/dialogue opcode: a 1-
 - **A single global text-speed throttle is written by `FUN_8013da00` (7 callers); the living doc associates it with a "Set Text Speed" opcode, but the catalog has `0x76 = Dark Screen`, so the opcode-number attribution is pending reconciliation.** — `[S] 1/3`
   - S: `FUN_8013da00` (7 callers in the disassembly)
   - S: FFTPatcher `EventCommands.xml` {76} row — "Dark Screen" (Unknown:1, Shape:1, Screen Expansion Speed:1, Rotation Speed:2, Square Expansion Speed:1); master catalog keeps the disasm cross-ref provisional pending static confirmation of the 0x76 dispatcher case
+  - ⚠ SUPERSEDED (2026-08-17) by: the main-executor comparison chain pins `0x75` → `set_event_text_glyph_throttle` (`0x8013da00`) and `0x76` → DarkScreen (`battle:0x80145260`) — the catalog's provisional `0x76 → 0x8013da00` cross-ref was a misattribution
   - src: `research/wiki_articles/event_instruction_10_display_message.md`
 - **Input advance is gated for boxed dialog only: `event_dialogue_tick` at `0x8012F6D4` polls the pad via `SCUS_get_inverted_button_input` (`0x8012FBF8`), tests the CIRCLE bit (`andi v0,0x20` at `0x8012FC00`), and writes the advance flag to `0x80166080`; the screen-overlay/prayer path is not input-gated — in scenario 1 the next opcode is `{F1} Wait` (86 frames), so it auto-advances.** — `[S] 1/3`
   - S: `0x8012F6D4` (`event_dialogue_tick`), `0x8012FBF8` (`SCUS_get_inverted_button_input`), CIRCLE-bit test at `0x8012FC00`, advance flag `0x80166080`

@@ -19,8 +19,10 @@ The on-disk 196-byte (0xC4) ParticleEmitter record embedded in each E###.BIN's P
 - **Callback parameters 0x4C–0x53 and 0xA8–0xAE are not read by the particle system (it lerps start/end but discards the result); MIPS callbacks read them directly — e.g. E317 CB91 uses 0x4C/0x4E for CLUT blend-mode bits and brightness-table index, and 0xA8/0xAA for trail UV step range (value>>3 = pixels/segment) and ribbon width.** — `[S] 1/3`
   - S: callback_param fields and E317 CB91/CB92 semantics, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
   - S: dead-code lerp of reserved_30_5B +0x1c/+0x1e → +0x20/+0x22 (callback params 0x4C–0x52) driven by the byte 0x0A high nibble (bits 20–23) in spawn routine FUN_801a60ac, result discarded, per `research/working_documents/CURVE_ANALYSIS.md`
+  - S: E317 CB92 reads callback_param_4/param_6 (0xA8/0xAC) as bicone radius start/end — in E317 the lerp curve index is −1 so no interpolation happens and growth comes from an accumulator instead; parameter semantics are callback-specific (the same offset means different things per callback), per `research/working_documents/E317_callback_system.md`
   - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
   - src: `research/working_documents/CURVE_ANALYSIS.md`
+  - src: `research/working_documents/E317_callback_system.md`
 - **Child emitters: byte 0xC0 child_emitter_on_death (enabled by emitter_flags_lo & 0x03) and 0xC1 child_emitter_mid_life (enabled by emitter_flags_lo & 0x0C); 0xC2/0xC3 are unused.** — `[S] 1/3`
   - S: child-emitter bytes and enable masks, per `research/key_documents/STRUCTURE_DEFINITIONS.md`
   - src: `research/key_documents/STRUCTURE_DEFINITIONS.md`
@@ -53,3 +55,4 @@ The on-disk 196-byte (0xC4) ParticleEmitter record embedded in each E###.BIN's P
 - [[Effect File Format]]
 - [[Effect Execution Model]]
 - [[Particle Runtime State]]
+- [[E317 Choco Ball Callback System]]
