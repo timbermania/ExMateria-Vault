@@ -71,11 +71,15 @@ The PSX floating damage number is a per-unit sprite popup, not a menu-font glyph
 - **The per-unit sprite composite draws 4 ordered layers (back→front) from the layer-priority table at RAM 0x80094548 (BATTLE.BIN 0x2D548) — 24 entries × 4 slots, FFHacktics-named 0=unit body, 1=weapon, 2=effect, 3=status/damage text graphic — and the entry index is what the SEQ `SetLayerPriority` opcode (0xFFE2) sets; the engine reads slot values in the loop at 0x800867d0 and skips zero slots.** — `[S·R] 2/3`
   - S: `t2 = 0x80094548` (Ghidra label `unit_layer_ordering_table`), composite loop 0x800867d0–0x8008680c, per `battle_disassembly.txt`
   - R: `godot-learning/tools/parse_layer_priority.py` → `assets/sprites/layer_priority.json` (24×4); `SpriteLayerManager.gd` implements only slots 0–2 (TYPE1/WEP1/EFF1) and drops token 3
+  - ⚠ SUPERSEDED (2026-08-19) by: The 4 slots are 32-bit words, so a row is 16 bytes and the table spans 384 bytes — a parser using a 4-byte row stride only covers the first 6 rows and returns aliased garbage for rows 6..23; token 3 is the damage-text track this note's own popup points prove is a real layer
   - src: `research/working_documents/DAMAGE_NUMBER_DISPLAY_INVESTIGATION.md`
 - **The game-loop pacer `FUN_80093a98` fires exactly once per rendered frame (waits vblank at `kernel_vblank_wait @0x8001DBA8`, then PutDispEnv-swaps the double buffer; buffer index `_DAT_8004597C`) — the cool 1/frame breakpoint used for all per-frame sampling of the popup.** — `[S·D] 2/3`
   - S: `FUN_80093a98`, `kernel_vblank_wait @0x8001DBA8`, `_DAT_8004597C`, per `battle_disassembly.txt`
   - D: Exec BP @ 0x80093A98 pacer used for the phase logs and packet captures, rounds 3–7 (2026-07-24/25)
   - src: `research/working_documents/DAMAGE_NUMBER_DISPLAY_INVESTIGATION.md`
+- **The layer-priority table is 24 rows of 4 `u32` — `row = 0x80094548 + u16[actor + 0x14] * 16` — and it is stored front-first, so a painter's-order consumer reverses it.** — `[S] 1/3`
+  - S: `BATTLE.BIN+0x2D548` dumped whole off the US retail disc image. At a 16-byte stride every row is a clean permutation of 0..3 as little-endian words — row 0 `00 00 00 00 | 01 00 00 00 | 02 00 00 00 | 03 00 00 00`, row 1 `0,1,3,2`, row 2 `0,2,1,3`, row 6 `1,0,2,3` — while at a 4-byte stride the same bytes read as `0,1,2,3,0,1,3,2,…`, which is the first six rows' low bytes repeating. The indexing site is `build_one_actor_sprite` at `BATTLE.BIN+1f640` (2026-08-19)
+  - src: external contribution — web-psx `tools/combatdata.ts` `readTrackOrder` (see [[Web-psx Cross-Validation]])
 
 ## Notes
 
@@ -87,3 +91,4 @@ The PSX floating damage number is a per-unit sprite popup, not a menu-font glyph
 - [[Combat Color Appliers]]
 - [[Ordering Table & AddPrim]]
 - [[PSX GPU Primitives]]
+- [[Web-psx Cross-Validation]]
