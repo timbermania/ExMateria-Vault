@@ -31,6 +31,7 @@ The master inventory of the vanilla PSX FFT event (scenario/cinematic) instructi
   - src: `research/working_documents/CAMERA_ROTATION_OPCODES_63_73_19_INVESTIGATION.md`
 - **`{1D}` Camera Fusion Start is a bracket-opener consumed by `{1E}` Camera Fusion End, whose handler is `0x8013db9c` (`camera_fusion_end_queue_build`) with the fusion spline at `0x8013dfb0`.** — `[S] 1/3`
   - S: `0x8013db9c` (`camera_fusion_end_queue_build`), spline `0x8013dfb0` (`battle_disassembly.txt`, master catalog rows {1D}/{1E})
+  - ⚠ SUPERSEDED (2026-08-19) by: `0x8013db9c` is `{1D}`'s builder, not `{1E}`'s — `{1D}`'s rung spawns a task on it at case body `0x80144c58`, while `{1E}` has no body at all: its rung branches straight to the advance tail `0x80145f24`, making it a one-byte no-op the interpreter walks over
   - src: `research/wiki_articles/event_instructions.md`
 - **`{2D}` Rotate Unit is handled at `0x80148284` (`evt0x2D_rotate_unit_handler`), a 16-direction 22.5° facing wheel.** — `[S] 1/3`
   - S: `0x80148284` (`evt0x2D_rotate_unit_handler`) (`battle_disassembly.txt`, master catalog row {2D})
@@ -71,6 +72,10 @@ The master inventory of the vanilla PSX FFT event (scenario/cinematic) instructi
 - **The scenario 1 (Orbonne chapel) event chunk at `0x8004A6BC` is 200 opcodes long — the chapel trace walks PC 0–199 of it.** — `[S] 1/3`
   - S: per-PC opcode table `static_chunk.tsv` (200 rows) for the chunk at `0x8004A6BC`
   - src: `research/working_documents/chapel_opcode_trace/report.md`
+- **The interpreter's comparison chain is 145 rungs, and it can be read mechanically rather than transcribed — which settles opcode attribution questions from the binary alone: of the 127 distinct opcodes that appear across all 304 scripted slots, exactly one (`0xD4`, a jump label) has no rung.** — `[S] 1/3`
+  - S: web-psx `src/events/dispatch.ts` walks the ladder at `0x80143d0c` out of `BATTLE.BIN`'s image and classifies each case body as a small CFG by what it calls — `Initialize_Thread` is a spawn, `EventLabelSearch` a jump, the forward scanner a block skip, the four scheduler routines the blocking idioms. Three things a scan must know: `0xC0` and `0xF2` are tested first and go straight to the advance tail (this vault's pair of no-ops); `0xA0..0xA5` and `0xB0..0xBE` are `sltiu` ranges with no rungs of their own; and **one rung compares against `$s0`** — `0x3B` and `0x6E` share a body and select different builders inside it, so a scan that follows only `$v0` silently loses SpriteMove and reports 144 rungs. Everything with no rung falls out of the bottom into "exit the current fiber" at `0x80145f3c`, and the falsifier is that a shipped script never falls in (2026-08-19)
+  - D: the 20 spawn rows reproduce, statically and with no machine running, every `(opcode, fiber body)` pair that diffing a live battle's alive-vector measured (web-psx `docs/event-seam.md` [event.hle.dispatch]; cross-referenced 2026-08-19)
+  - src: external contribution — web-psx `docs/event-seam.md` [event.hle.dispatch] (see [[Web-psx Cross-Validation]])
 
 ## Notes
 
@@ -90,3 +95,4 @@ The master inventory of the vanilla PSX FFT event (scenario/cinematic) instructi
 - [[Scenario Table]]
 - [[Event Sound OpCodes]]
 - [[Reset Palette Opcode]]
+- [[Web-psx Cross-Validation]]
