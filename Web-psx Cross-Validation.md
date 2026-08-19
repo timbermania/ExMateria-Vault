@@ -82,10 +82,10 @@ you have a pose track for scenario 1 with no beat parking at all. Two readings
 of the same pose are available and they should be dumped together, because a
 disagreement between them is itself informative:
 
-- **The scratch struct** this vault already names: `+0x68` X, `+0x6c` Y, `+0x70`
+- The **scratch struct** this vault already names: `+0x68` X, `+0x6c` Y, `+0x70`
   Z, `+0x74` pitch, `+0x78` yaw, `+0x7c` roll, `+0x80` zoom — copied each vblank
   into the GTE mirror at `0x8016e3f0…e408` with no curve math.
-- **The event variables the `{19}` task actually reads and writes**, which is the
+- The **event variables the `{19}` task actually reads and writes**, which is the
   authored pose in the script's own units. The task takes its ids from
   `CAMERA_VAR_IDS` at `80165ED4h` against the variable array at `*(0x80165F9C)`:
   ids `0x1A`/`0x1B`/`0x1C` are X/Z/Y **stored `<<10`**, and `0x1D`/`0x1E`/`0x1F`/
@@ -150,19 +150,19 @@ disagreement is interesting to both sides and we will chase it from our end.
 in full (lean-psx `docs/kb/BATTLE.BIN/000df110`), and five of its behaviours are
 things a pose track will otherwise look like noise without:
 
-- **`0x2710` (10000) is the per-field "leave alone" sentinel on *every*
-  component**, tested in the animation loop (`801462FCh`) and again twice in the
+- The `0x2710` (10000) value is the per-field **"leave alone" sentinel on
+  *every* component**, tested in the animation loop (`801462FCh`) and again twice in the
   snap-to-target epilogue (`801465CCh`, `8014661Ch`).
-- **A one-shot `+4096` map-rotation unwrap.** If `801696F8h` is non-zero — it is
+- There is a **one-shot `+4096` map-rotation unwrap.** If `801696F8h` is non-zero — it is
   set to 1 once, by the event engine's startup at `80143F94h` — the first
   `Camera` of a scene adds one whole turn to the stored yaw when that takes the
   interpolation the short way round. Only `+4096` is ever considered, never
   `−4096`. A pose track that starts with an unexplained 4096-unit jump is this.
-- **Two dead zones.** A move of under 1536 in 1/256 units (**6 script units**) on
+- There are **two dead zones.** A move of under 1536 in 1/256 units (**6 script units**) on
   X/Z/Y, or under 96 in 1/64 units (**1.5 units**) on the rotations and zoom, is
   not animated at all — it only lands in the epilogue's snap
   (`80146350h`, `80146374h`).
-- **A genuine rounding bug at `0x80146538`**, and we think it is your ±1/1024
+- There is a **genuine rounding bug at `0x80146538`**, and we think it is your ±1/1024
   residual. The round-to-nearest there masks with `0FFh` against a **6-bit**
   fixed point, so bits 6–7 of the integer part leak into the test: for a positive
   value `(v & 0FFh) < 33` only passes when `(v >> 6) & 3 == 0`, and three times
@@ -171,7 +171,7 @@ things a pose track will otherwise look like noise without:
   1024-unit move — so ±1 unit *is* ±1/1024 of that move. The same rounding done
   correctly appears at `8013E4C0h` in camera fusion, where the mask is `0FFFh`
   against a 12-bit fixed point. Reproduce it literally.
-- **The epilogue writes the exact parameters regardless**, so an implementation
+- The **epilogue writes the exact parameters regardless**, so an implementation
   only has to get intermediate frames approximately right but must land exactly.
 
 One clock question worth pinning while you are in there: we read `Time` as
@@ -187,13 +187,13 @@ Offered because several `[S] 1/3` points here are one cheap run away from `[D]`,
 and because two of the corrections above are the kind a shadow diff finds
 automatically.
 
-- **Bound a capture by the machine's clock, not by wall time.** Capture
+- Prefer to **bound a capture by the machine's clock, not by wall time.** Capture
   identifiers in this vault are shaped like "90 s chapel capture" and "30 s".
   A wall-clock window is not reproducible across hosts and cannot be diffed
   against a later run; an emulated frame count or an instruction count can. Our
   equivalents name a frame range (`frames 3819–5999`) or a packet count, and a
   re-run reproduces them exactly.
-- **Grade `[R]` claims with a diff shadow, not with eyeballs.** The pattern that
+- Consider grading **`[R]` claims with a diff shadow rather than with eyeballs.** The pattern that
   found every effect-system error we know of: run the reimplementation *beside*
   the emulated game, in the same process, and diff **every byte** it writes into
   the structures the game writes — the work block, the effect record, the
@@ -204,7 +204,7 @@ automatically.
   cannot run inside the emulator, but the same shape works across a socket: emit
   the reimplementation's per-frame state and diff it against the emulator's, and
   an `[R]` badge starts meaning something a test can fail on.
-- **Prefer a static walk that has to close.** The cheapest falsifier we have for
+- Prefer **a static walk that has to close.** The cheapest falsifier we have for
   a table read out of the binary is one where a wrong answer cannot land: a
   script slot's first word is its text-section offset, so a width-table walk must
   land on it exactly — 304 of 304 do, which validates all 176 widths at once and
@@ -213,12 +213,12 @@ automatically.
   `SCUS_942.21` table set is validated by *tiling* — each table's offset plus its
   length lands on the next one's — and it is that property which shows the
   Ability Animation Table stops at 454 rows.
-- **Take savestates at instruction boundaries.** A state taken at a block
+- Take **savestates at instruction boundaries.** A state taken at a block
   boundary composes with an input recording, so a moment can be resumed and
   re-measured rather than re-navigated; our replay is deterministic to a
   checkpoint hash, which is what lets a measurement be *re-run* six months later
   rather than re-argued.
-- **Read the dispatch, don't transcribe it.** Both of the event-VM attribution
+- Read **the dispatch rather than transcribing it.** Both of the event-VM attribution
   errors corrected above (`{1E}`, `{7E}`/`{7F}`) fall out of walking the
   interpreter's own comparison chain in the binary and classifying each case body
   by what it calls. It is 145 rungs; a scan that only follows `$v0` loses one of
