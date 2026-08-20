@@ -79,6 +79,10 @@ FFT's effect camera controls position, rotation (angles), and zoom during E###.B
   - S: target/caster/cursor entries 0x801BAD10/0x801BADB0/0x801BADCA, FUN_801AAB44/FUN_801AAB90/FUN_801AAC28, per `research/working_documents/CAMERA_SYSTEM.md`
   - src: `research/working_documents/CAMERA_SYSTEM.md`
 
+- **The 3 camera tables' offsets are confirmed by an arithmetic none of them was chosen to satisfy: each table's 4 gaps agree on one keyframe count, and 17 + 21 + 21 = 59 a file over 401 files is 23,659 — the same total a full-corpus walk reports.** — `[S] 1/3`
+  - S: at 2 bytes an end-frame or command entry and 6 bytes a data entry, the gaps between the given offsets divide with no residue — FOR-EACH-TARGET (`06b2/06d4/073a/07a0/0806`) 17 17 17 17, MAIN (`14e6/1510/158e/160c/168a`) 21 21 21 21, CLEANUP (`16b6/16e0/175e/17dc/185a`) 21 21 21 21. **12 gaps, 1 answer per table.** Over all 401 files: 23,659 of 23,659 end frames at or under `0x2000`; 5,018 keyframes carry a non-zero command word; the shake keyframes are 256 in 69 files and all 256 read as 3 `int16` within ±4096, which is the claimed layout. A correction to *our* earlier cross-reference rather than to this note: the guess that `185a` left "23 command entries" in the section's 6,280 bytes was wrong — CLEANUP's command table is 21 entries ending at `0x1884` = 6,276, so **4 bytes are spare, not 46** (web-psx `docs/effect-format.md` [effect.xref.timeline]) (2026-08-19)
+  - src: external contribution — web-psx `docs/effect-format.md` [effect.xref.timeline] (see [[Web-psx Cross-Validation]])
+
 ## Notes
 
 (empty — user territory)
